@@ -1,0 +1,45 @@
+---
+import { formatDate } from "@/utils/format-date";
+import { getBlogPosts } from "@/utils/blog";
+
+const recentPosts = getBlogPosts().slice(0, 3);
+---
+
+<section aria-label="Recent blog posts">
+  <div class="flex items-baseline gap-4 mb-4">
+    <h2 class="font-mono text-xl">
+      <span class="text-green-600 dark:text-green-400">#</span> blog
+    </h2>
+    <a
+      href="/blog"
+      data-astro-navigate
+      class="font-mono text-sm text-zinc-500 dark:text-zinc-400 hover:text-green-600 dark:hover:text-green-400 active:text-green-600 dark:active:text-green-400 transition-colors duration-200"
+      >[all posts]</a
+    >
+  </div>
+  <ul class="space-y-4" role="list">
+    {
+      recentPosts.map((post) => (
+        <li>
+          <article>
+            <a
+              href={`/blog/${post.slug}`}
+              data-astro-navigate
+              class="inline-flex gap-2 items-baseline group flex-wrap"
+            >
+              <h3 class="font-mono text-base group-hover:text-green-600 dark:group-hover:text-green-400 group-active:text-green-600 dark:group-active:text-green-400 transition-colors duration-200">
+                {post.title}
+              </h3>
+              <time
+                datetime={post.date.toISOString()}
+                class="font-mono text-sm text-zinc-500 dark:text-zinc-400 whitespace-nowrap"
+              >
+                {formatDate(post.date, "short")}
+              </time>
+            </a>
+          </article>
+        </li>
+      ))
+    }
+  </ul>
+</section>

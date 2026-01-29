@@ -1,0 +1,41 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import RandomAsciiImage from "@/components/ascii/random-ascii-image";
+import MediaQuery from "@/components/MediaQuery";
+import { ASCII_IMAGE_PATHS } from "@/components/ascii/constants/random-ascii-images.config";
+
+export const prerender = false;
+
+const requestedPath = Astro.url.pathname;
+---
+
+<Layout title="404 - Page Not Found | Ankit Mehta" description="Page not found">
+  <div class="relative z-10 min-h-screen flex flex-col">
+    <Header />
+
+    <main
+      class="w-full max-w-4xl mx-auto px-4 flex-1 flex flex-col justify-center"
+      transition:name="main-content"
+    >
+      <div class="space-y-6">
+        <div class="font-mono">
+          <h1 class="text-4xl md:text-6xl mb-2">404</h1>
+          <p class="text-xl text-zinc-500 dark:text-zinc-400">page not found</p>
+        </div>
+
+        <div class="font-mono text-base text-zinc-500 dark:text-zinc-400 space-y-1">
+          <p>$ cat {requestedPath}</p>
+          <p class="text-red-600 dark:text-red-400">cat: {requestedPath}: No such file or directory</p>
+        </div>
+      </div>
+    </main>
+
+    <Footer />
+  </div>
+  <MediaQuery client:load minWidth="3xl">
+    <RandomAsciiImage images={ASCII_IMAGE_PATHS.left} />
+  </MediaQuery>
+  <RandomAsciiImage client:load images={ASCII_IMAGE_PATHS.right} />
+</Layout>

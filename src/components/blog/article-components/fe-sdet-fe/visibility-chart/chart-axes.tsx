@@ -1,0 +1,49 @@
+import { CHART, AXIS } from "./constants";
+
+interface ChartAxesProps {
+  axisColor?: string;
+}
+
+export function ChartAxes({ axisColor = AXIS.color }: ChartAxesProps) {
+  const { left, top } = CHART.padding;
+  const bottom = CHART.height - CHART.padding.bottom;
+  const right = CHART.width - CHART.padding.right;
+
+  return (
+    <>
+      <line x1={left} y1={top} x2={left} y2={bottom} stroke={axisColor} strokeWidth={AXIS.strokeWidth} />
+      <polygon
+        points={`${left},${top - AXIS.arrowSize} ${left - AXIS.arrowSize},${top + AXIS.arrowSize} ${left + AXIS.arrowSize},${top + AXIS.arrowSize}`}
+        fill={axisColor}
+      />
+
+      <line x1={left} y1={bottom} x2={right} y2={bottom} stroke={axisColor} strokeWidth={AXIS.strokeWidth} />
+      <polygon
+        points={`${right + AXIS.arrowSize},${bottom} ${right - AXIS.arrowSize},${bottom - AXIS.arrowSize} ${right - AXIS.arrowSize},${bottom + AXIS.arrowSize}`}
+        fill={axisColor}
+      />
+
+      <text
+        x="10"
+        y="170"
+        fontSize="12"
+        fill={axisColor}
+        transform="rotate(-90, 10, 160)"
+        textAnchor="middle"
+        fontFamily="Geist Mono, monospace"
+      >
+        {AXIS.labels.y}
+      </text>
+      <text
+        x={CHART.width / 2}
+        y={CHART.height - 2}
+        fontSize="12"
+        fill={axisColor}
+        fontFamily="Geist Mono, monospace"
+        textAnchor="middle"
+      >
+        {AXIS.labels.x}
+      </text>
+    </>
+  );
+}

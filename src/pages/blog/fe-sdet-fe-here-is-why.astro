@@ -1,0 +1,276 @@
+---
+import BlogLayout from "@/layouts/BlogLayout.astro";
+import VisibilityChart from "@/components/blog/article-components/fe-sdet-fe/visibility-chart";
+import ExampleTabs from "@/components/blog/example-tabs";
+import ResilientSdet from "@/components/blog/article-components/fe-sdet-fe/resilient-sdet.png";
+import Responsibility from "@/components/blog/article-components/fe-sdet-fe/responsibility.png";
+
+export const frontmatter = {
+  title: "Debouncing vs Throttling: When to Use Which",
+  description: "When to Use Which - A Practical Guide with Real Examples",
+  date: new Date("2025-12-21"),
+};
+---
+
+<BlogLayout frontmatter={frontmatter}>
+  <p>When I first heard about debouncing and throttling, I thought they were just fancy terms that senior developers used to sound smart. But after dealing with laggy search bars and jumpy scroll animations in my projects, I realized these are actually lifesavers that every developer should know.</p>
+
+  <p>If you've ever wondered why your search function is making too many API calls or why your scroll event is making the page slow, this article is for you.</p>
+
+  
+  <h2>What's the Problem?</h2>
+
+  <p>Let me start with a story. Last month, I was building a search feature where users could type and see live results. Simple, right? Here’s what I wrote first:</p>
+
+  <pre><code class="language-js">
+{`const searchInput = document.getElementById('search');
+
+searchInput.addEventListener('input', (e) => {
+  searchAPI(e.target.value);
+});`}
+</code></pre>
+
+
+  
+
+  <p>Looks fine, but there's a huge problem. Every single keystroke was making an API call. If someone typed 'javascript' that's 10 API calls! The server was getting hammered, and the user experience was terrible.</p>
+
+  <p>This is where debouncing and throttling come to rescue us</p>
+
+  <h2>Debouncing: Wait Until They Stop</h2>
+
+  <p>Think of debouncing like waiting for someone to finish talking before you respond. You don't interrupt them after every word, you wait for a pause</p>
+
+  <p>Debouncing delays the execution until after a certain time has passed since the last call.</p>
+
+<p>fixed my search problem:</p>
+
+<pre>
+  <code>
+    {
+      `function debounce(func, delay) {
+  let timeoutId;
+  return function (...args) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+const searchInput = document.getElementById('search');
+const debouncedSearch = debounce((query) => {
+  searchAPI(query);
+}, 500);
+
+searchInput.addEventListener('input', (e) => {
+  debouncedSearch(e.target.value);
+});`
+    }
+  </code>
+</pre>
+
+<p>Now, the API only gets called 500ms after the user stops typing. Much better!</p>
+
+<h2>When to Use Debouncing:</h2>
+
+<ul>
+  <li>Search bars — wait until typing stops</li>
+  <li>Form validation — don’t validate every keystroke</li>
+  <li>Save buttons — prevent multiple clicks</li>
+  <li>Window resize events — wait until resizing ends</li>
+</ul>
+
+
+
+<h2>Throttling: Control the Rate</h2>
+
+<p>Throttling is different. It's like having a rule that you can only speak once every minute, no matter how much you want to say.</p>
+
+<p>Throttling limits how often a function can be called within a specific time period</p>
+
+<p>example with scroll events:</p>
+
+<pre>
+  <code>
+    {`
+    
+function throttle(func, limit) {
+  let inThrottle;
+  return function (...args) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  };
+}
+
+const handleScroll = throttle(() => {
+  console.log('User is scrolling');
+  // Update navbar, check scroll position, etc.
+}, 100);
+
+window.addEventListener('scroll', handleScroll);
+    `}
+  </code>
+</pre>
+
+<i>This ensures the scroll handler only runs once every 100ms, instead of firing hundreds of times per second</i>
+
+<h2>When to Use Throttling:</h2>
+
+<ul>
+  <li>Scroll events — Update UI elements smoothly</li>
+  <li>Mouse movement tracking — For games or interactive elements
+</li>
+  <li>API rate limiting — Ensure you don't exceed limits
+</li>
+  <li>Button clicks — Prevent spam clicking</li>
+</ul>
+
+
+
+<h2>The Key Difference (In Simple Terms)</h2>
+
+<p> <b>Debouncing:</b> “I'll do it after you stop bothering me for X seconds”</p>
+<p> <b>Throttling:</b> “I'll do it, but only once every X seconds, no matter what”</p>
+
+<p>Here's a visual way to think about it:</p>
+
+
+
+<p><b>User types “hello” in 1 second:</b></p>
+
+<ul>
+  <li><b>Without any optimization:</b>  5 API calls (h, e, l, l, o)</li>
+  <li><b>With debouncing (500ms):</b>  1 API call (after they stop typing)</li>
+  <li> <b>With throttling (200ms):</b> 2–3 API calls (at regular intervals while typing)
+</li>
+</ul>
+
+<h2>Real Examples in React</h2>
+
+<p>Since most of us work with React, here are some practical hooks:</p>
+
+<p><b>Custom Debounce Hook:</b></p>
+
+<pre>
+  <code>{`
+import { useState, useEffect } from 'react';
+
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+
+// Usage in component
+function SearchComponent() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      // Make API call here
+      searchAPI(debouncedSearchTerm);
+    }
+  }, [debouncedSearchTerm]);
+
+  return (
+    <input 
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      placeholder="Search..."
+    />
+  );
+}
+  `}</code>
+</pre>
+
+<p><b>Custom Throttle Hook:</b></p>
+
+<pre><code>{`
+
+import { useRef, useCallback } from 'react';
+
+function useThrottle(callback, delay) {
+  const lastRan = useRef(Date.now());
+  
+  return useCallback((...args) => {
+    if (Date.now() - lastRan.current >= delay) {
+      callback(...args);
+      lastRan.current = Date.now();
+    }
+  }, [callback, delay]);
+}
+
+// Usage
+function ScrollComponent() {
+  const throttledScrollHandler = useThrottle(() => {
+    console.log('Scroll event handled');
+  }, 100);
+  
+  return (
+  <div onScroll={throttledScrollHandler}>
+    {/* Your scrollable content */}
+  </div>
+  );
+}
+      `}</code></pre>
+
+<h2>Common Mistakes I Made (So You Don't Have To)</h2>
+<ol>
+  <li> <b>Using debouncing for everything</b> — I thought debouncing was always better. Wrong! For things like scroll animations, throttling gives smoother results.
+</li>
+<li><b>Wrong delay times</b>  — I used 1000ms debounce for search. Users thought the app was broken! 300–500ms is usually sweet spot.</li>
+<li><b>Not cleaning up</b>  — In React, always clean up your timeouts in useEffect cleanup functions.</li>
+<li><b>Over-engineering</b>  — Don't use these techniques where they're not needed. A simple button click doesn't need debouncing unless it's making API calls.</li>
+</ol>
+
+<h2>Quick Decision Guide</h2>
+
+<p>Ask yourself:</p>
+
+<ul>
+  <li>Do I want to wait until activity stops? => <b>Use debouncing</b></li>
+  <li>Do I want to limit how often something happens? => <b>Use throttling</b></li>
+  <li>Is it a search/input field? => <b>Probably debouncing</b></li>
+  <li>Is it scroll/mouse events? > <b>Probably throttling</b></li>
+</ul>
+
+
+
+
+
+<h2>Libraries vs Custom Implementation</h2>
+
+<p>While I showed custom implementations above, libraries like Lodash have well-tested versions:</p>
+
+<pre><code>{`
+import { debounce, throttle } from 'lodash';
+
+const debouncedSearch = debounce(searchFunction, 500);
+const throttledScroll = throttle(scrollHandler, 100);
+`}</code></pre>
+
+<i>For production apps, I usually go with Lodash because it handles edge cases I might miss.</i>
+
+<h2>Conclusion</h2>
+
+<p>Debouncing and throttling aren't just optimization techniques, they're essential tools for building smooth user experiences. They help you be kind to your servers, improve performance, and make your apps feel more responsive.</p>
+
+<p><b>Start small:</b> add debouncing to your next search feature or throttling to your scroll handlers. You'll immediately see the difference, and your users (and servers) will thank you.</p>
+
+<p><b>Remember: </b> debouncing waits for calm, throttling controls the storm. Both have their place in a developer's toolkit.</p>
+
+  <p><i> Hit me up on X with the links below if you want to discuss pretty much anything.<br />Thank you for reading!</i> </p>
+</BlogLayout>
