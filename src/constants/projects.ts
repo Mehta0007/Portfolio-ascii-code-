@@ -35,7 +35,7 @@ export const PROJECTS = [
       "Vercel",
     ],
 
-    live: "https://job-tracker.vercel.app",
+    live: "https://job-application-tracker-2ebj.vercel.app",
 
     github: "https://github.com/Mehta0007/Job-Application-Tracker.git",
 
